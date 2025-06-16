@@ -154,17 +154,15 @@
     <script>
         lucide.createIcons();
 
-        // Supabase configuration for Netlify
-        // These variables will be populated by Netlify's Snippet Injection feature.
-        const SUPABASE_URL = window.SUPABASE_URL;
-        const SUPABASE_KEY = window.SUPABASE_KEY;
+        // Supabase configuration
+        const SUPABASE_URL = "https://lsxtudnsaidrjekjfrao.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzeHR1ZG5zYWlkcmpla2pmcmFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxOTIxMjYsImV4cCI6MjA2Mzc2ODEyNn0.mnW_PEEIVLxumqmXv-IZHKRAvDxENAGjVfYjnPxU1Ks";
         
         let supabase;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Check if Supabase client and config are available
-            if (window.supabase && SUPABASE_URL && SUPABASE_KEY) {
-                // Initialize Supabase client
+            // Initialize Supabase client
+            if (window.supabase) {
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 
                 // Load initial data
@@ -177,11 +175,11 @@
                 document.getElementById('statusFilter').addEventListener('change', loadAppointments);
 
             } else {
-                // Handle missing configuration
-                console.error("Supabase configuration is missing or client failed to load.");
+                // Handle missing Supabase client
+                console.error("Supabase client failed to load.");
                 const appointmentsList = document.getElementById('appointmentsList');
                 if(appointmentsList) {
-                    appointmentsList.innerHTML = `<div class="card p-4 text-center text-red-500"><strong>Configuration Error:</strong> Could not connect to the database. Please ensure the application is configured correctly.</div>`;
+                    appointmentsList.innerHTML = `<div class="card p-4 text-center text-red-500"><strong>Error:</strong> Could not load Supabase client. Please check your internet connection.</div>`;
                 }
                  const loading = document.getElementById('loading');
                 if(loading) loading.style.display = 'none';
