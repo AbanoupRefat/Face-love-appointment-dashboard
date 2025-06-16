@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .appointment-card.completed {
+            border-left: 4px solid #10B981; /* green-500 */
+        }
+        .appointment-card.paid {
+            border-left-color: #F59E0B; /* amber-500 */
+        }
+        .btn-primary {
+            background-color: #3B82F6; /* blue-500 */
+        }
+        .btn-primary:hover {
+            background-color: #2563EB; /* blue-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i data-lucide="calendar-check" class="h-8 w-8 text-blue-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-xl font-bold text-gray-800">Appointment Dashboard</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4 md:p-6 lg:p-8">
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="card p-4 flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-500 mr-4">
+                    <i data-lucide="calendar-days" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Appointments</p>
+                    <p id="totalAppointments" class="text-2xl font-bold text-gray-800">0</p>
+                </div>
+            </div>
+            <div class="card p-4 flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-500 mr-4">
+                    <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Completed</p>
+                    <p id="completedAppointments" class="text-2xl font-bold text-gray-800">0</p>
+                </div>
+            </div>
+            <div class="card p-4 flex items-center">
+                <div class="p-3 rounded-full bg-yellow-100 text-yellow-500 mr-4">
+                    <i data-lucide="credit-card" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Paid</p>
+                    <p id="paidAppointments" class="text-2xl font-bold text-gray-800">0</p>
+                </div>
+            </div>
+            <div class="card p-4 flex items-center">
+                <div class="p-3 rounded-full bg-indigo-100 text-indigo-500 mr-4">
+                    <i data-lucide="wallet" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Revenue</p>
+                    <p id="totalRevenue" class="text-2xl font-bold text-gray-800">0 EGP</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="card p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label for="timePeriod" class="block text-sm font-medium text-gray-700 mb-1">Time Period</label>
+                    <select id="timePeriod" class="w-full mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option value="daily">Today</option>
+                        <option value="weekly">This Week</option>
+                        <option value="monthly">This Month</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="branchFilter" class="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                    <select id="branchFilter" class="w-full mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option value="">All Branches</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="statusFilter" class="w-full mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option value="">All Status</option>
+                        <option value="completed">Completed</option>
+                        <option value="pending">Pending</option>
+                        <option value="paid">Paid</option>
+                        <option value="unpaid">Unpaid</option>
+                    </select>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="loadAppointments()" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <i data-lucide="search" class="w-5 h-5 mr-2"></i>Filter
+                    </button>
+                    <button onclick="resetFilters()" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <i data-lucide="rotate-cw" class="w-5 h-5 mr-2"></i>Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="text-center py-10" style="display: none;">
+            <div role="status" class="flex justify-center items-center">
+                 <svg aria-hidden="true" class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0492C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                </svg>
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p class="mt-3 text-gray-600">Loading appointments...</p>
+        </div>
+        
+        <!-- Appointments List -->
+        <div id="appointmentsList" class="space-y-4">
+            <!-- Content will be dynamically injected here -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        lucide.createIcons();
+
+        // Supabase configuration for Netlify
+        // These variables will be populated by Netlify's Snippet Injection feature.
+        const SUPABASE_URL = window.SUPABASE_URL;
+        const SUPABASE_KEY = window.SUPABASE_KEY;
+        
+        let supabase;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if Supabase client and config are available
+            if (window.supabase && SUPABASE_URL && SUPABASE_KEY) {
+                // Initialize Supabase client
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                
+                // Load initial data
+                loadBranches();
+                loadAppointments();
+
+                // Add event listeners for filters
+                document.getElementById('timePeriod').addEventListener('change', loadAppointments);
+                document.getElementById('branchFilter').addEventListener('change', loadAppointments);
+                document.getElementById('statusFilter').addEventListener('change', loadAppointments);
+
+            } else {
+                // Handle missing configuration
+                console.error("Supabase configuration is missing or client failed to load.");
+                const appointmentsList = document.getElementById('appointmentsList');
+                if(appointmentsList) {
+                    appointmentsList.innerHTML = `<div class="card p-4 text-center text-red-500"><strong>Configuration Error:</strong> Could not connect to the database. Please ensure the application is configured correctly.</div>`;
+                }
+                 const loading = document.getElementById('loading');
+                if(loading) loading.style.display = 'none';
+            }
+        });
+
+        async function loadBranches() {
+            if (!supabase) return;
+            try {
+                const { data, error } = await supabase
+                    .from('appointments')
+                    .select('branch')
+                    .not('branch', 'is', null);
+                
+                if (error) throw error;
+                
+                const branches = [...new Set(data.map(item => item.branch).filter(Boolean))];
+                const branchSelect = document.getElementById('branchFilter');
+                // Clear existing options before adding new ones
+                branchSelect.innerHTML = '<option value="">All Branches</option>';
+                branches.forEach(branch => {
+                    const option = document.createElement('option');
+                    option.value = branch;
+                    option.textContent = branch;
+                    branchSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading branches:', error);
+            }
+        }
+
+        async function loadAppointments() {
+            if (!supabase) return;
+
+            const loading = document.getElementById('loading');
+            const appointmentsList = document.getElementById('appointmentsList');
+            
+            loading.style.display = 'block';
+            appointmentsList.innerHTML = ''; // Clear previous results before loading
+
+            try {
+                const timePeriod = document.getElementById('timePeriod').value;
+                const branch = document.getElementById('branchFilter').value;
+                const status = document.getElementById('statusFilter').value;
+                
+                let query = supabase
+                    .from('appointments')
+                    .select(`
+                        *,
+                        clients:client_id(name, phone),
+                        users:user_id(name)
+                    `)
+                    .order('scheduled_time', { ascending: false });
+                
+                const now = new Date();
+                let startDate, endDate;
+                
+                if (timePeriod === 'daily') {
+                    startDate = new Date(now.setHours(0, 0, 0, 0));
+                    endDate = new Date(new Date().setHours(23, 59, 59, 999));
+                } else if (timePeriod === 'weekly') {
+                    const first = now.getDate() - now.getDay();
+                    startDate = new Date(new Date(now).setDate(first));
+                    startDate.setHours(0,0,0,0);
+                    endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + 6);
+                    endDate.setHours(23,59,59,999);
+                } else if (timePeriod === 'monthly') {
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    endDate.setHours(23,59,59,999);
+                }
+                
+                if (startDate && endDate) {
+                    query = query
+                        .gte('scheduled_time', startDate.toISOString())
+                        .lte('scheduled_time', endDate.toISOString());
+                }
+                
+                if (branch) {
+                    query = query.eq('branch', branch);
+                }
+                
+                const { data, error } = await query;
+                if (error) throw error;
+                
+                let filteredData = data || [];
+                
+                if (status) {
+                    filteredData = filteredData.filter(app => {
+                        if (status === 'completed') return app.is_completed;
+                        if (status === 'pending') return !app.is_completed;
+                        if (status === 'paid') return app.is_paid;
+                        if (status === 'unpaid') return !app.is_paid;
+                        return true;
+                    });
+                }
+                
+                updateStats(filteredData);
+                renderAppointments(filteredData);
+                
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                appointmentsList.innerHTML = `<div class="card p-4 text-center text-red-500">Failed to load appointments. Please try again.</div>`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function updateStats(appointments) {
+            const total = appointments.length;
+            const completed = appointments.filter(app => app.is_completed).length;
+            const paid = appointments.filter(app => app.is_paid).length;
+            const totalRevenue = appointments
+                .filter(app => app.is_paid)
+                .reduce((sum, app) => sum + (parseFloat(app.session_price) || 0), 0);
+            
+            document.getElementById('totalAppointments').textContent = total;
+            document.getElementById('completedAppointments').textContent = completed;
+            document.getElementById('paidAppointments').textContent = paid;
+            document.getElementById('totalRevenue').textContent = `${totalRevenue.toLocaleString('en-EG', { style: 'currency', currency: 'EGP' })}`;
+        }
+
+        function renderAppointments(appointments) {
+            const container = document.getElementById('appointmentsList');
+            container.innerHTML = ''; // Clear previous content
+            
+            if (appointments.length === 0) {
+                // If there are no appointments, inject the "no appointments" message.
+                container.innerHTML = `
+                    <div id="noAppointments" class="text-center py-10 card">
+                         <div class="flex justify-center mb-4">
+                            <i data-lucide="calendar-x" class="w-16 h-16 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-700">No appointments found</h3>
+                        <p class="mt-2 text-gray-500">Try adjusting your filters or check back later.</p>
+                    </div>
+                `;
+            } else {
+                // If there are appointments, create and append cards.
+                appointments.forEach(appointment => {
+                    const card = createAppointmentCard(appointment);
+                    container.appendChild(card);
+                });
+            }
+            // Create icons for the newly added elements.
+            lucide.createIcons();
+        }
+
+        function createAppointmentCard(appointment) {
+            const card = document.createElement('div');
+            card.className = `card appointment-card overflow-hidden ${appointment.is_completed ? 'completed' : ''} ${appointment.is_paid ? 'paid' : ''}`;
+            
+            const scheduledTime = new Date(appointment.scheduled_time);
+            const clientName = appointment.clients?.name || 'N/A';
+            const serviceName = appointment.service || 'N/A';
+            const userName = appointment.users?.name || 'N/A';
+            const branch = appointment.branch || 'N/A';
+            const price = appointment.session_price ? parseFloat(appointment.session_price) : 0;
+            
+            card.innerHTML = `
+                <div class="p-5">
+                    <div class="flex flex-col md:flex-row justify-between md:items-start">
+                        <!-- Left Side: Main Details -->
+                        <div class="flex-grow">
+                            <div class="flex items-center mb-3">
+                                <span class="p-2 rounded-full bg-gray-100 mr-3">
+                                    <i data-lucide="user" class="w-5 h-5 text-gray-600"></i>
+                                </span>
+                                <h3 class="font-bold text-lg text-gray-800">${clientName}</h3>
+                            </div>
+
+                            <div class="space-y-2 text-sm text-gray-600">
+                                <p class="flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-2 text-gray-400"></i><span class="font-medium text-gray-700">${scheduledTime.toLocaleDateString('en-GB')} at ${scheduledTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></p>
+                                <p class="flex items-center"><i data-lucide="scissors" class="w-4 h-4 mr-2 text-gray-400"></i>${serviceName}</p>
+                                <p class="flex items-center"><i data-lucide="user-cog" class="w-4 h-4 mr-2 text-gray-400"></i>Assigned to: ${userName}</p>
+                                <p class="flex items-center"><i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-400"></i>Branch: ${branch}</p>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Price and Status -->
+                        <div class="mt-4 md:mt-0 md:text-right flex-shrink-0 md:ml-6">
+                             <div class="text-2xl font-bold text-blue-600 mb-3">${price.toLocaleString('en-EG', { style: 'currency', currency: 'EGP' })}</div>
+                             <div class="flex flex-row md:flex-col items-start md:items-end space-x-2 md:space-x-0 md:space-y-2">
+                                ${appointment.is_completed 
+                                    ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><i data-lucide="check" class="w-3 h-3 mr-1"></i>Completed</span>` 
+                                    : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"><i data-lucide="loader" class="w-3 h-3 mr-1"></i>Pending</span>`
+                                }
+                                ${appointment.is_paid 
+                                    ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"><i data-lucide="check" class="w-3 h-3 mr-1"></i>Paid</span>` 
+                                    : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"><i data-lucide="circle-dollar-sign" class="w-3 h-3 mr-1"></i>Unpaid</span>`
+                                }
+                                ${appointment.payment_method ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">${appointment.payment_method}</span>` : ''}
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function resetFilters() {
+            document.getElementById('timePeriod').value = 'daily';
+            document.getElementById('branchFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            loadAppointments();
+        }
+    </script>
+</body>
+</html>
